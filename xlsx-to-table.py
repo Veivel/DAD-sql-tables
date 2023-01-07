@@ -7,7 +7,8 @@ from pathlib import Path
 
 #### VARIABLES ####
 
-target_xlsx = 'testcases/employees_all.xlsx'
+# target_xlsx = 'testcases/employees_all.xlsx'
+target_xlsx = input("Path of target xlsx file: ")
 delim = ';'
 content = '''
 FirstName VARCHAR(64),
@@ -16,6 +17,13 @@ Salary INT,
 Department VARCHAR(128)'''
 
 ###################
+
+print("csv delimiter: ", delim)
+print("table schema: ", content)
+proceed = input("Do you want to continue? (Y/n) ")
+
+if proceed.lower() != "y":
+    exit(0)
 
 df_arr = pd.read_excel(target_xlsx, None)
 for sheet_name in df_arr:
