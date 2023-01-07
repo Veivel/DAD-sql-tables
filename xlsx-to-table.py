@@ -5,13 +5,19 @@ import pandas as pd
 import os
 from pathlib import Path
 
+preset_schemas = {
+    'countries': '''Country VARCHAR(128), Population INT''',
+    'employees': '''FirstName VARCHAR(64),LastName VARCHAR(64),Salary INT,Department VARCHAR(128)'''
+}
+
+
 #### VARIABLES ####
 
 # target_xlsx = 'testcases/employees_all.xlsx'
 user = input("\n-> PSQL role name: ")
 target_xlsx = input("-> Path of target xlsx file: ")
 delim = ';'
-content = '''FirstName VARCHAR(64),LastName VARCHAR(64),Salary INT,Department VARCHAR(128)'''
+content = input("-> table schema (raw from backend, or preset if exist): ")
 DROP_FIRST = True
 
 ###################
