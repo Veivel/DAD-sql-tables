@@ -8,22 +8,22 @@ from pathlib import Path
 #### VARIABLES ####
 
 # target_xlsx = 'testcases/employees_all.xlsx'
-target_xlsx = input("Path of target xlsx file: ")
+user = input("\n-> PSQL role name: ")
+target_xlsx = input("-> Path of target xlsx file: ")
 delim = ';'
-content = '''
-FirstName VARCHAR(64),
-LastName VARCHAR(64),
-Salary INT,
-Department VARCHAR(128)'''
+content = '''FirstName VARCHAR(64),LastName VARCHAR(64),Salary INT,Department VARCHAR(128)'''
+DROP_FIRST = True
 
 ###################
 
-print("csv delimiter: ", delim)
-print("table schema: ", content)
+print("-> CSV delimiter: ", delim)
+print("-> Table schema: ", content)
 proceed = input("Do you want to continue? (Y/n) ")
 
 if proceed.lower() != "y":
     exit(0)
+    
+psql_config = f"psql -U {user} -d das_test_db -c"
 
 df_arr = pd.read_excel(target_xlsx, None)
 for sheet_name in df_arr:
@@ -32,9 +32,19 @@ for sheet_name in df_arr:
     print(f"\n======== ======== {sheet_name} ======== ========")
     print(df)
     
+    # drop the table ()
+    if DROP_FIRST:
+        print(subprocess.Popen(
+                f'{psql_config} "DROP TABLE {sheet_name};"', 
+                stdout=subprocess.PIPE, 
+                shell=True, 
+                universal_newlines=True
+            ).stdout.read()
+        )
+    
     # create the table
     print(subprocess.Popen(
-            f'psql -d das_test_db -c "CREATE TABLE {sheet_name} ({content});"', 
+            f'{psql_config} "CREATE TABLE {sheet_name} ({content});"', 
             stdout=subprocess.PIPE, 
             shell=True, 
             universal_newlines=True
@@ -48,7 +58,7 @@ for sheet_name in df_arr:
     
     # import csv into newly-created table
     print(subprocess.Popen(
-            f'''psql -d das_test_db -c "copy {sheet_name} from '{absolute}/temp.csv' delimiter '{delim}' csv header;"''', 
+            f'''{psql_config} "copy {sheet_name} from '{absolute}/temp.csv' delimiter '{delim}' csv header;"''', 
             stdout=subprocess.PIPE, 
             shell=True, 
             universal_newlines=True
