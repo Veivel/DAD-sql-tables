@@ -1,7 +1,7 @@
 ## Preparation
 
 1. pull image of postgres:14.6
-2. execute/open container
+2. execute/open container (`docker exec -it <container name> <runtime>`)
 
 ## Usage
 

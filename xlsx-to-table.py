@@ -13,23 +13,30 @@ preset_schemas = {
 
 #### VARIABLES ####
 
-# target_xlsx = 'testcases/employees_all.xlsx'
-user = input("\n-> PSQL role name: ")
-target_xlsx = input("-> Path of target xlsx file: ")
+db_name = "das_test_db"
+db_user = "test"
+db_password = "" # no need
 delim = ';'
-content = input("-> table schema (raw from backend, or preset if exist): ")
+
+target_xlsx = input("-> path of target XLSX file: ")
+schema = ""
+schema_name = input("-> preset schema (empty if none):")
+if schema_name == "":
+    schema = input("-> raw table schema: ")
+else:
+    schema = preset_schemas[schema_name]
 DROP_FIRST = True
 
 ###################
 
 print("-> CSV delimiter: ", delim)
-print("-> Table schema: ", content)
+print("-> Table schema: ", schema)
 proceed = input("Do you want to continue? (Y/n) ")
 
 if proceed.lower() != "y":
     exit(0)
     
-psql_config = f"psql -U {user} -d das_test_db -c"
+psql_config = f"psql -U {db_user} -d {db_name} -c"
 
 df_arr = pd.read_excel(target_xlsx, None)
 for sheet_name in df_arr:
@@ -50,7 +57,7 @@ for sheet_name in df_arr:
     
     # create the table
     print(subprocess.Popen(
-            f'{psql_config} "CREATE TABLE {sheet_name} ({content});"', 
+            f'{psql_config} "CREATE TABLE {sheet_name} ({schema});"', 
             stdout=subprocess.PIPE, 
             shell=True, 
             universal_newlines=True
@@ -60,11 +67,12 @@ for sheet_name in df_arr:
     # export sheet to temporary csv
     relative = Path(".")
     absolute = os.path.abspath(relative)  # absolute is a str object
-    df.to_csv(f"temp.csv", sep=delim, index=False)
+    temp_csv_filename = f"temp_{sheet_name}"
+    df.to_csv(f"{temp_csv_filename}.csv", sep=delim, index=False)
     
     # import csv into newly-created table
     print(subprocess.Popen(
-            f'''{psql_config} "copy {sheet_name} from '{absolute}/temp.csv' delimiter '{delim}' csv header;"''', 
+            f'''{psql_config} "copy {sheet_name} from '{absolute}/{temp_csv_filename}.csv' delimiter '{delim}' csv header;"''', 
             stdout=subprocess.PIPE, 
             shell=True, 
             universal_newlines=True
