@@ -23,10 +23,10 @@ preset_schemas = {
 
 #### VARIABLES ####
 
-db_name = "das_test_db"
-db_user = "veii"
-db_password = "" # no need
-delim = ';'
+db_name = os.environ.get("db_name")
+db_user = os.environ.get("db_user")
+db_password = os.environ.get("db_password")
+delim = os.environ.get("delimiter")
 
 def main():
     # Get Input
